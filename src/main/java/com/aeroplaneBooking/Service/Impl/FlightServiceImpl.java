@@ -12,16 +12,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import com.aeroplaneBooking.Dtos.FlightSearchRequestDto;
+import com.aeroplaneBooking.Repositories.UserRepository;
 import com.aeroplaneBooking.Service.FlightServie;
+import com.aeroplaneBooking.entities.UserEntity;
 
 @Service
 public class FlightServiceImpl implements FlightServie {
 
 	@Autowired
+	private UserRepository userRepository;
+
+	@Autowired
 	private RestClient restClient;
 
 	@Override
-	public String searchFlights(FlightSearchRequestDto request) {
+	public String searchFlights(Integer userId, FlightSearchRequestDto request) {
+		UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not Found"));
+
 		Map<String, Object> slice = new HashMap<>();
 		slice.put("origin", request.getOrigin());
 		slice.put("destination", request.getDestination());
@@ -48,6 +55,14 @@ public class FlightServiceImpl implements FlightServie {
 		String response = restClient.post().uri("/air/offer_requests").contentType(MediaType.APPLICATION_JSON)
 				.body(requestBody).retrieve().body(String.class);
 
+		return response;
+	}
+
+	@Override
+	public String searchAirports(Integer userId, String query) {
+		UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not Found"));
+		String response = restClient.get().uri("/places/suggestions?query={query}", query).retrieve()
+				.body(String.class);
 		return response;
 	}
 

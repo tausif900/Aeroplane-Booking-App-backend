@@ -26,8 +26,8 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
 		httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 				.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf((csrf) -> csrf.disable())
-				.authorizeHttpRequests(
-						(request) -> request.requestMatchers("/auth/**").permitAll().anyRequest().authenticated());
+				.authorizeHttpRequests((request) -> request.requestMatchers("/auth/**").permitAll()
+						.requestMatchers("/flight/**").hasRole("User").anyRequest().authenticated());
 		return httpSecurity.build();
 	}
 
