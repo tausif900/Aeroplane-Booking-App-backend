@@ -14,7 +14,7 @@ public class DuffleConfig {
 	@Bean
 	public RestClient restClient() {
 		RestClient restClient = RestClient.builder().baseUrl("https://api.duffel.com")
-				.defaultHeader("Authorization", "Bearer" + duffelToken).defaultHeader("Duffel-Version", "v2").build();
+				.defaultHeader("Authorization", "Bearer " + duffelToken).defaultHeader("Duffel-Version", "v2").build();
 		return restClient;
 	}
 
