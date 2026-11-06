@@ -8,4 +8,6 @@ public interface FlightServie {
 
 	String searchAirports(Integer userId, String query);
 
+	String getFlightById(String flightId);
+
 }

@@ -66,4 +66,12 @@ public class FlightServiceImpl implements FlightServie {
 		return response;
 	}
 
+	@Override
+	public String getFlightById(String flightId) {
+		 System.out.println("Calling Duffel for: " + flightId);
+		String response = restClient.get().uri("/air/offers/{flightId}", flightId).retrieve().body(String.class);
+		 System.out.println("Duffel response received");
+		return response;
+	}
+
 }
