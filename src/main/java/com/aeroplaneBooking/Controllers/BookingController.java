@@ -14,6 +14,8 @@ import com.aeroplaneBooking.Dtos.BookingResponseDto;
 import com.aeroplaneBooking.Service.BookingService;
 import com.aeroplaneBooking.entities.UserEntity;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/bookings")
 public class BookingController {
@@ -23,8 +25,7 @@ public class BookingController {
 
 	@PostMapping("/create-booking")
 	public ResponseEntity<BookingResponseDto> createBooking(@AuthenticationPrincipal UserEntity user,
-			@RequestBody BookingRequestDto request) {
-		System.out.println("Api testing started");
+			@Valid @RequestBody BookingRequestDto request) {
 		return new ResponseEntity<BookingResponseDto>(bookingService.createBooking(user.getUserId(), request),
 				HttpStatus.CREATED);
 	}
