@@ -19,7 +19,7 @@ public class BookingResponseDto {
 
 	private Integer bookingId;
 
-	private UserEntity user;
+	private Integer userId;
 
 	private List<PassengerEntity> passenger;
 

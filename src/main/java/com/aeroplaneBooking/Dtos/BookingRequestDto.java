@@ -18,8 +18,6 @@ public class BookingRequestDto {
 
 	private Integer bookingId;
 
-	private UserEntity user;
-
 	@Valid
 	private List<PassengerDto> passenger;
 

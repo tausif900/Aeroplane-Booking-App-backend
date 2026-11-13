@@ -37,9 +37,9 @@ public class BookingServiceImpl implements BookingService {
 		booking.setFlightId(request.getFlightId());
 		booking.setEmail(request.getEmail());
 		booking.setPhoneNumber(request.getPhoneNumber());
-		booking.setUser(user);
 		booking.setBookingStatus(BookingStatus.PENDING);
 		booking.setPaymentStatus(PaymentStatus.PENDING);
+		booking.setUser(user);
 		List<PassengerDto> passenger = request.getPassenger();
 		for (PassengerDto passengerDto : passenger) {
 			PassengerEntity p = new PassengerEntity();
@@ -56,6 +56,7 @@ public class BookingServiceImpl implements BookingService {
 		BookingEntity savedBooking = bookingRepository.save(booking);
 
 		BookingResponseDto responseDto = modelMapper.map(savedBooking, BookingResponseDto.class);
+		responseDto.setUserId(savedBooking.getUser().getUserId());
 
 		return responseDto;
 	}

@@ -24,6 +24,7 @@ public class BookingController {
 	@PostMapping("/create-booking")
 	public ResponseEntity<BookingResponseDto> createBooking(@AuthenticationPrincipal UserEntity user,
 			@RequestBody BookingRequestDto request) {
+		System.out.println("Api testing started");
 		return new ResponseEntity<BookingResponseDto>(bookingService.createBooking(user.getUserId(), request),
 				HttpStatus.CREATED);
 	}

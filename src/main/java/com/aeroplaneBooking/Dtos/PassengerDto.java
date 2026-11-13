@@ -45,6 +45,6 @@ public class PassengerDto {
 	private String nationality;
 
 //	Booking Id
-	private BookingEntity booking;
+	private Integer bookingId;
 
 }
