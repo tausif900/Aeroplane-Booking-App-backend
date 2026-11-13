@@ -1,10 +1,13 @@
 package com.aeroplaneBooking.entities;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.aeroplaneBooking.Enum.BookingStatus;
+import com.aeroplaneBooking.Enum.PaymentStatus;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -30,8 +33,8 @@ public class BookingEntity {
 	@ManyToOne
 	private UserEntity user;
 
-	@OneToMany(mappedBy = "booking")
-	private List<PassengerEntity> passenger;
+	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
+	private List<PassengerEntity> passenger = new ArrayList<>();
 
 //	flight offer id
 	private String flightId;
@@ -46,5 +49,8 @@ public class BookingEntity {
 
 	@Enumerated(EnumType.STRING)
 	private BookingStatus bookingStatus;
+	
+	@Enumerated(EnumType.STRING)
+	private PaymentStatus paymentStatus;
 
 }
