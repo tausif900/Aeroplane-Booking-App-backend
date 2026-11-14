@@ -14,9 +14,13 @@ import com.aeroplaneBooking.Enum.PaymentStatus;
 import com.aeroplaneBooking.Repositories.BookingRepository;
 import com.aeroplaneBooking.Repositories.UserRepository;
 import com.aeroplaneBooking.Service.BookingService;
+import com.aeroplaneBooking.Service.FlightServie;
 import com.aeroplaneBooking.entities.BookingEntity;
 import com.aeroplaneBooking.entities.PassengerEntity;
 import com.aeroplaneBooking.entities.UserEntity;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -30,9 +34,24 @@ public class BookingServiceImpl implements BookingService {
 	@Autowired
 	private ModelMapper modelMapper;
 
+	@Autowired
+	private ObjectMapper objectMapper;
+
+	@Autowired
+	private FlightServie flightServie;
+
 	@Override
 	public BookingResponseDto createBooking(Integer userId, BookingRequestDto request) {
 		UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+		String flightById = flightServie.getFlightById(request.getFlightId());
+		try {
+			JsonNode root = objectMapper.readTree(flightById);
+			JsonNode data = root.path("data");
+			String totalAmount = data.path("total_amount").stringValue();
+			String totalCurrency = data.path("total_currency").stringValue();
+		} catch (Exception e) {
+			throw new RuntimeException("Unable to parse Duffel response", e);
+		}
 		BookingEntity booking = new BookingEntity();
 		booking.setFlightId(request.getFlightId());
 		booking.setEmail(request.getEmail());
