@@ -17,5 +17,11 @@ public class DuffleConfig {
 				.defaultHeader("Authorization", "Bearer " + duffelToken).defaultHeader("Duffel-Version", "v2").build();
 		return restClient;
 	}
+	
+	@Bean
+	public RestClient exchangeRateRestClient() {
+		RestClient restClient = RestClient.builder().baseUrl("https://api.frankfurter.dev").build();
+		return restClient;
+	}
 
 }

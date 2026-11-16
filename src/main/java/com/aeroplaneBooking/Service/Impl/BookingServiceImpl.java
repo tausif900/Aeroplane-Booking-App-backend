@@ -1,10 +1,14 @@
 package com.aeroplaneBooking.Service.Impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import com.aeroplaneBooking.Dtos.BookingRequestDto;
 import com.aeroplaneBooking.Dtos.BookingResponseDto;
@@ -40,26 +44,44 @@ public class BookingServiceImpl implements BookingService {
 	@Autowired
 	private FlightServie flightServie;
 
+	@Autowired
+	@Qualifier("exchangeRateRestClient")
+	private RestClient exchangeRateRestClient;
+
 	@Override
 	public BookingResponseDto createBooking(Integer userId, BookingRequestDto request) {
 		UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-		String flightById = flightServie.getFlightById(request.getFlightId());
+
+		String flight = flightServie.getFlightById(request.getFlightId());
+
+		BigDecimal amountInINR = null;
+
 		try {
-			JsonNode root = objectMapper.readTree(flightById);
+			JsonNode root = objectMapper.readTree(flight);
 			JsonNode data = root.path("data");
 			String totalAmount = data.path("total_amount").stringValue();
 			String totalCurrency = data.path("total_currency").stringValue();
+			String exchangeRateResponse = exchangeRateRestClient.get()
+					.uri("/v1/latest?base={base}&symbols=INR", totalCurrency).retrieve().body(String.class);
+			BigDecimal exchangeRate = objectMapper.readTree(exchangeRateResponse).path("rates").path("INR")
+					.decimalValue();
+			BigDecimal amount = new BigDecimal(totalAmount);
+			amountInINR = amount.multiply(exchangeRate).setScale(2, RoundingMode.HALF_UP);
 		} catch (Exception e) {
 			throw new RuntimeException("Unable to parse Duffel response", e);
 		}
+
 		BookingEntity booking = new BookingEntity();
 		booking.setFlightId(request.getFlightId());
 		booking.setEmail(request.getEmail());
 		booking.setPhoneNumber(request.getPhoneNumber());
 		booking.setBookingStatus(BookingStatus.PENDING);
 		booking.setPaymentStatus(PaymentStatus.PENDING);
+		booking.setTotalAmount(amountInINR);
+		booking.setCurrency("INR");
 		booking.setUser(user);
 		List<PassengerDto> passenger = request.getPassenger();
+
 		for (PassengerDto passengerDto : passenger) {
 			PassengerEntity p = new PassengerEntity();
 			p.setFirstName(passengerDto.getFirstName());
@@ -72,10 +94,13 @@ public class BookingServiceImpl implements BookingService {
 			p.setBooking(booking);
 			booking.getPassenger().add(p);
 		}
+
 		BookingEntity savedBooking = bookingRepository.save(booking);
 
 		BookingResponseDto responseDto = modelMapper.map(savedBooking, BookingResponseDto.class);
 		responseDto.setUserId(savedBooking.getUser().getUserId());
+		responseDto.setTotalAmount(savedBooking.getTotalAmount());
+		responseDto.setCurrency(savedBooking.getCurrency());
 
 		return responseDto;
 	}
