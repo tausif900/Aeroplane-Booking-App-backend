@@ -55,18 +55,30 @@ public class BookingServiceImpl implements BookingService {
 		String flight = flightServie.getFlightById(request.getFlightId());
 
 		BigDecimal amountInINR = null;
+		BigDecimal baseAmt = null;
+		BigDecimal taxAmt = null;
 
 		try {
 			JsonNode root = objectMapper.readTree(flight);
 			JsonNode data = root.path("data");
 			String totalAmount = data.path("total_amount").stringValue();
+			String baseAmount = data.path("base_amount").stringValue();
+			String taxAmount = data.path("tax_amount").stringValue();
 			String totalCurrency = data.path("total_currency").stringValue();
 			String exchangeRateResponse = exchangeRateRestClient.get()
 					.uri("/v1/latest?base={base}&symbols=INR", totalCurrency).retrieve().body(String.class);
+
 			BigDecimal exchangeRate = objectMapper.readTree(exchangeRateResponse).path("rates").path("INR")
 					.decimalValue();
+
 			BigDecimal amount = new BigDecimal(totalAmount);
 			amountInINR = amount.multiply(exchangeRate).setScale(2, RoundingMode.HALF_UP);
+
+			BigDecimal base = new BigDecimal(baseAmount);
+			baseAmt = base.multiply(exchangeRate).setScale(2, RoundingMode.HALF_UP);
+
+			BigDecimal tax = new BigDecimal(taxAmount);
+			taxAmt = tax.multiply(exchangeRate).setScale(2, RoundingMode.HALF_UP);
 		} catch (Exception e) {
 			throw new RuntimeException("Unable to parse Duffel response", e);
 		}
@@ -101,6 +113,8 @@ public class BookingServiceImpl implements BookingService {
 		responseDto.setUserId(savedBooking.getUser().getUserId());
 		responseDto.setTotalAmount(savedBooking.getTotalAmount());
 		responseDto.setCurrency(savedBooking.getCurrency());
+		responseDto.setBaseAmount(baseAmt);
+		responseDto.setTaxAmount(taxAmt);
 
 		return responseDto;
 	}

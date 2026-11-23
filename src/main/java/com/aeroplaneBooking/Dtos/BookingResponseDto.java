@@ -34,7 +34,11 @@ public class BookingResponseDto {
 
 	private String currency;
 
+	private BigDecimal baseAmount;
+
+	private BigDecimal taxAmount;
+
 	private BookingStatus bookingStatus;
-	
+
 	private PaymentStatus paymentStatus;
 }
